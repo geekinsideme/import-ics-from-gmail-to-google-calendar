@@ -3,49 +3,49 @@ function myFunction() {
 
         CalendarApp = function() {};
         CalendarApp.getCalendarsByName = function(name) {
-            var calenders = [];
-            calenders.push( new Calendar());
-            return calenders;
+            var _calenders = [];
+            _calenders.push( new Calendar());
+            return _calenders;
         };
 
         Calendar = function() {
-            var events = [];
-            events.push( new CalendarEvent());
-            this.events = events;
+            var _events = [];
+            _events.push( new CalendarEvent());
+            this.events = _events;
             return this;
         };
         Calendar.events = [];
         Calendar.prototype.getEvents = function(start,end) {
             return this.events;
-        }
+        };
         Calendar.prototype.createEvent = function(title, startTime, endTime, options) {
-            var event = new CalendarEvent();
-            event.title = title;
-            event.startTime = startTime;
-            event.endTime = endTime;
-            event.options = options;
-            this.events.push( event );
-            return event;
-        }
+            var _event = new CalendarEvent();
+            _event.title = title;
+            _event.startTime = startTime;
+            _event.endTime = endTime;
+            _event.options = options;
+            this.events.push( _event );
+            return _event;
+        };
         Calendar.prototype.createAllDayEvent = function(title, date, options) {
-            var event = new CalendarEvent();
-            event.title = title;
-            event.date = date;
-            event.options = options;
-            this.events.push( event );
-            return event;
-        }
+            var _event = new CalendarEvent();
+            _event.title = title;
+            _event.date = date;
+            _event.options = options;
+            this.events.push( _event );
+            return _event;
+        };
 
         CalendarEvent = function() {};
         CalendarEvent.prototype.deleteEvent = function() {};
         CalendarEvent.prototype.addPopupReminder = function(minutesBefore) {
             this.popupremainder = minutesBefore;
             return this;
-        }
+        };
         CalendarEvent.prototype.setVisibility = function(visibility) {
             this.visibility = visibility;
             return this;
-        }
+        };
 
         CalendarApp.Visibility = function() {};
         CalendarApp.Visibility.CONFIDENTIAL = 1;
@@ -63,6 +63,7 @@ function myFunction() {
     var Timezone = function() {};
     var Event = function() {};
     var Tag = function() {};
+    var n;
 
     function extractICSProperty(eventstr,tag) {
         var match;
@@ -70,7 +71,7 @@ function myFunction() {
         val.value = "";
         val.parameter = "";
         val.paramValue = "";
-        if( match = eventstr.match(new RegExp("^"+tag+"(;?)([^=:]*?)([=]?)([^=:]*?):(.*?)(\\\\n)*$","im")) ) {
+        if( (match = eventstr.match(new RegExp("^"+tag+"(;?)([^=:]*?)([=]?)([^=:]*?):(.*?)(\\\\n)*$","im")))!==null ) {
             val.value = match[5].replace(/\\n/g,"\n");
             val.parameter = match[2];
             val.paramValue = match[4];
@@ -80,7 +81,7 @@ function myFunction() {
 
     function convertDate( str,tz ) {
         var match;
-        if( match = str.match(/(\d{4})(\d{2})(\d{2})$/) ) {
+        if( (match = str.match(/(\d{4})(\d{2})(\d{2})$/))!==null ) {
             str = match[1]+"/"+match[2]+"/"+match[3];
         }else{
             if( str.match(/Z$/) ) {
@@ -117,7 +118,7 @@ function myFunction() {
         var fs = require('fs');
         ics = fs.readFileSync('./'+icsFileName, 'utf8');
     } else {
-        var messages = new Array();
+        var messages = [];
         var thds = GmailApp.search("filename:"+icsFileName);
         for(var nt in thds){
             var meses = thds[nt].getMessages();
@@ -126,14 +127,14 @@ function myFunction() {
             }
         }
 
-        if( messages.length == 0 ) {
+        if( messages.length === 0 ) {
           Logger.log("No Messages found.");
           return;
         }
 
         var newestMessage;
         var newestDate = new Date("2000/1/1");
-        for(var n in messages){
+        for(n in messages){
             if( messages[n].getDate() > newestDate){
                 newestDate = messages[n].getDate();
                 newestMessage = messages[n];
@@ -141,7 +142,7 @@ function myFunction() {
         }
         Logger.log("Newest message '"+newestMessage.getSubject()+"'@"+newestDate);
 
-        for(var n in messages){
+        for(n in messages){
             if( messages[n] !== newestMessage){
                 messages[n].moveToTrash();
                 Logger.log("Old message '"+messages[n].getSubject()+"'@"+messages[n].getDate()+" was trashed.");
@@ -192,12 +193,12 @@ function myFunction() {
         var reminderValue = extractICSProperty( eventDef[0],"TRIGGER").value;
         var match;
         var minutesBefore;
-        if( match = reminderValue.match(/([+-])P(\d+W|)(\d+D|)T?(\d+H|)(\d+M|)(\d+S|)/) ) {
-            minutesBefore = Number(match[2].replace(/W/,""))*7*24*60
-                + Number(match[3].replace(/D/,""))*24*60
-                + Number(match[4].replace(/H/,""))*60
-                + Number(match[5].replace(/M/,""))
-                + Number(match[6].replace(/S/,""))/60.0;
+        if( (match = reminderValue.match(/([+-])P(\d+W|)(\d+D|)T?(\d+H|)(\d+M|)(\d+S|)/))!==null ) {
+            minutesBefore = Number(match[2].replace(/W/,""))*7*24*60 +
+                Number(match[3].replace(/D/,""))*24*60 +
+                Number(match[4].replace(/H/,""))*60 +
+                Number(match[5].replace(/M/,"")) +
+                Number(match[6].replace(/S/,""))/60.0;
             if( match[1]=="+" ) minutesBefore = -minutesBefore;
             event.reminder = minutesBefore;
         } else {
@@ -209,50 +210,50 @@ function myFunction() {
 
     var cals = CalendarApp.getCalendarsByName(calendarName);
     var cal = null;
-    if (cals.length == 0){
+    if (cals.length === 0){
         Logger.log("Calendar '"+calendarName+"' not found.");
     } else {
         cal = cals[0];
     }
     var deleteEvents = cal.getEvents( new Date("1900/01/01"),new Date("2199/12/31"));
     Logger.log("DELETING "+deleteEvents.length+" event(s)");
-    for(var n in deleteEvents){
+    for(n in deleteEvents){
         deleteEvents[n].deleteEvent();
     }
     var now = new Date();
     cal.createEvent("Import @"+formatDate(now), now, now);
 
     Logger.log("INSERTING "+events.length+" event(s)");
-    for(var n in events){
-        var event;
+    for(n in events){
+        var gcalEvent;
         if( events[n].allDay ) {
-            event = cal.createAllDayEvent( events[n].title,events[n].date,
+            gcalEvent = cal.createAllDayEvent( events[n].title,events[n].date,
                 {location:events[n].location, description:events[n].description}
             );
         } else {
-            event = cal.createEvent( events[n].title,events[n].startTime,events[n].endTime,
+            gcalEvent = cal.createEvent( events[n].title,events[n].startTime,events[n].endTime,
                 {location:events[n].location, description:events[n].description}
             );
         }
-        if( events[n].reminder!="" ) {
-            event.addPopupReminder( events[n].reminder );
+        if( events[n].reminder!=="" ) {
+            gcalEvent.addPopupReminder( events[n].reminder );
         }
         switch (events[n].visibility) {
             case "PUBLIC":
-                event.setVisibility(CalendarApp.Visibility.PUBLIC);
+                gcalEvent.setVisibility(CalendarApp.Visibility.PUBLIC);
                 break;
             case "PRIVATE":
-                event.setVisibility(CalendarApp.Visibility.PRIVATE);
+                gcalEvent.setVisibility(CalendarApp.Visibility.PRIVATE);
                 break;
             default:
-            event.setVisibility(CalendarApp.Visibility.DEFAULT);
+            gcalEvent.setVisibility(CalendarApp.Visibility.DEFAULT);
         }
     }
 
     if( typeof SitesApp === "undefined") {
         var insertedEvents = cal.getEvents( new Date("1900/01/01"),new Date("2199/12/31"));
         Logger.log("Inserted Events = "+insertedEvents.length);
-        for(var n in insertedEvents){
+        for(n in insertedEvents){
             Logger.log(insertedEvents[n]);
         }
     }
