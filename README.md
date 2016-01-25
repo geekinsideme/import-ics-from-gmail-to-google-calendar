@@ -1,4 +1,4 @@
-Import .ics file from Gmail attachment to Google Calendar (Google Apps Script)
+Import .ics file from Gmail attachment to Google Calendar automatically using Google Apps Script programmatically
 
 Gmail宛に添付された.icsファイルの内容をGoogleカレンダーに取り込む Google Apps Script
 
