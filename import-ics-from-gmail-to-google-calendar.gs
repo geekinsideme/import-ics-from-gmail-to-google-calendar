@@ -1,65 +1,4 @@
 function myFunction() {
-    if (typeof SitesApp === "undefined") {
-
-        CalendarApp = function() {};
-        CalendarApp.getCalendarsByName = function(name) {
-            var _calenders = [];
-            _calenders.push(new Calendar());
-            return _calenders;
-        };
-
-        Calendar = function() {
-            var _events = [];
-            _events.push(new CalendarEvent());
-            this.events = _events;
-            return this;
-        };
-        Calendar.events = [];
-        Calendar.prototype.getEvents = function(start, end) {
-            return this.events;
-        };
-        Calendar.prototype.createEvent = function(title, startTime, endTime, options) {
-            var _event = new CalendarEvent();
-            _event.title = title;
-            _event.startTime = startTime;
-            _event.endTime = endTime;
-            _event.options = options;
-            this.events.push(_event);
-            return _event;
-        };
-        Calendar.prototype.createAllDayEvent = function(title, date, options) {
-            var _event = new CalendarEvent();
-            _event.title = title;
-            _event.date = date;
-            _event.options = options;
-            this.events.push(_event);
-            return _event;
-        };
-
-        CalendarEvent = function() {};
-        CalendarEvent.prototype.deleteEvent = function() {};
-        CalendarEvent.prototype.addPopupReminder = function(minutesBefore) {
-            this.popupremainder = minutesBefore;
-            return this;
-        };
-        CalendarEvent.prototype.setVisibility = function(visibility) {
-            this.visibility = visibility;
-            return this;
-        };
-
-        CalendarApp.Visibility = function() {};
-        CalendarApp.Visibility.CONFIDENTIAL = 1;
-        CalendarApp.Visibility.DEFAULT = 2;
-        CalendarApp.Visibility.PRIVATE = 3;
-        CalendarApp.Visibility.PUBLIC = 4;
-
-        Logger = function() {};
-        Logger.log = console.log;
-        console.log("Run in node.js");
-    } else {
-        Logger.log("Run in Google Apps");
-    }
-
     var Timezone = function() {};
     var Event = function() {};
     var Tag = function() {};
@@ -114,49 +53,44 @@ function myFunction() {
     var calendarName = "Outlook";
 
     var ics;
-    if (typeof SitesApp === "undefined") {
-        var fs = require('fs');
-        ics = fs.readFileSync('./' + icsFileName, 'utf8');
-    } else {
-        var messages = [];
-        var thds = GmailApp.search("filename:" + icsFileName);
-        for (var nt in thds) {
-            var meses = thds[nt].getMessages();
-            for (var nm in meses) {
-                messages.push(meses[nm]);
-            }
+    var messages = [];
+    var thds = GmailApp.search("filename:" + icsFileName);
+    for (var nt in thds) {
+        var meses = thds[nt].getMessages();
+        for (var nm in meses) {
+            messages.push(meses[nm]);
         }
-
-        if (messages.length === 0) {
-            Logger.log("No Messages found.");
-            return;
-        }
-
-        var newestMessage;
-        var newestDate = new Date("2000/1/1");
-        for (n in messages) {
-            if (messages[n].getDate() > newestDate) {
-                newestDate = messages[n].getDate();
-                newestMessage = messages[n];
-            }
-        }
-        Logger.log("Newest message '" + newestMessage.getSubject() + "'@" + newestDate);
-
-        for (n in messages) {
-            if (messages[n] !== newestMessage) {
-                messages[n].moveToTrash();
-                Logger.log("Old message '" + messages[n].getSubject() + "'@" + messages[n].getDate() + " was trashed.");
-            }
-        }
-
-        var attachment = newestMessage.getAttachments()[0];
-        Logger.log("Newest attachment name and size : " + attachment.getName() + " has " + attachment.getSize() + " bytes");
-
-        ics = attachment.getDataAsString();
-
-        newestMessage.moveToTrash();
-        Logger.log("Newest message '" + newestMessage.getSubject() + "'@" + newestDate + " was trashed.");
     }
+
+    if (messages.length === 0) {
+        Logger.log("No Messages found.");
+        return;
+    }
+
+    var newestMessage;
+    var newestDate = new Date("2000/1/1");
+    for (n in messages) {
+        if (messages[n].getDate() > newestDate) {
+            newestDate = messages[n].getDate();
+            newestMessage = messages[n];
+        }
+    }
+    Logger.log("Newest message '" + newestMessage.getSubject() + "'@" + newestDate);
+
+    for (n in messages) {
+        if (messages[n] !== newestMessage) {
+            messages[n].moveToTrash();
+            Logger.log("Old message '" + messages[n].getSubject() + "'@" + messages[n].getDate() + " was trashed.");
+        }
+    }
+
+    var attachment = newestMessage.getAttachments()[0];
+    Logger.log("Newest attachment name and size : " + attachment.getName() + " has " + attachment.getSize() + " bytes");
+
+    ics = attachment.getDataAsString();
+
+    newestMessage.moveToTrash();
+    Logger.log("Newest message '" + newestMessage.getSubject() + "'@" + newestDate + " was trashed.");
 
     ics = ics.replace(/[\n\r]+[ \t]+/g, "");
 
@@ -210,7 +144,6 @@ function myFunction() {
             event.rrule = "";
         }
         events.push(event);
-        // Logger.log(event.visibility+" "+formatDate(event.startTime)+" - "+formatDate(event.endTime)+" : "+event.title+" @"+event.location);
     }
 
     var cals = CalendarApp.getCalendarsByName(calendarName);
@@ -225,8 +158,6 @@ function myFunction() {
     for (n in deleteEvents) {
         deleteEvents[n].deleteEvent();
     }
-    var now = new Date();
-    cal.createEvent("Import @" + formatDate(now), now, now);
 
     Logger.log("INSERTING " + events.length + " event(s)");
     for (n in events) {
@@ -341,15 +272,6 @@ function myFunction() {
         }
         Utilities.sleep(1000);
     }
-
-    if (typeof SitesApp === "undefined") {
-        var insertedEvents = cal.getEvents(new Date("1900/01/01"), new Date("2199/12/31"));
-        Logger.log("Inserted Events = " + insertedEvents.length);
-        for (n in insertedEvents) {
-            Logger.log(insertedEvents[n]);
-        }
-    }
-}
-if (typeof SitesApp === "undefined") {
-    myFunction();
+    var now = new Date();
+    cal.createEvent("Imported @" + formatDate(now), now, now);
 }
