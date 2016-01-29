@@ -4,6 +4,10 @@ function myFunction() {
     var Tag = function() {};
     var n;
 
+    // ****** DEFINITION *******
+    var icsFileName = "outlook.ics";
+    var calendarName = "Outlook";
+
     function extractICSProperty(eventstr, tag) {
         var match;
         var val = new Tag();
@@ -32,7 +36,7 @@ function myFunction() {
         return new Date(str);
     }
 
-    var formatDate = function(date, format) {
+    function formatDate(date, format) {
         if (!format) format = 'YYYY-MM-DD hh:mm:ss';
         format = format.replace(/YYYY/g, date.getFullYear());
         format = format.replace(/MM/g, ('0' + (date.getMonth() + 1)).slice(-2));
@@ -46,11 +50,7 @@ function myFunction() {
             for (var i = 0; i < length; i++) format = format.replace(/S/, milliSeconds.substring(i, i + 1));
         }
         return format;
-    };
-
-    // ****** DEFINITION *******
-    var icsFileName = "outlook.ics";
-    var calendarName = "Outlook";
+    }
 
     var ics;
     var messages = [];
@@ -88,9 +88,6 @@ function myFunction() {
     Logger.log("Newest attachment name and size : " + attachment.getName() + " has " + attachment.getSize() + " bytes");
 
     ics = attachment.getDataAsString();
-
-    newestMessage.moveToTrash();
-    Logger.log("Newest message '" + newestMessage.getSubject() + "'@" + newestDate + " was trashed.");
 
     ics = ics.replace(/[\n\r]+[ \t]+/g, "");
 
@@ -233,6 +230,7 @@ function myFunction() {
                 }
                 recurrence.onlyOnWeekdays(list);
             }
+            Utilities.sleep(1000);
             if (events[n].allDay) {
                 gcalEvent = cal.createAllDayEventSeries(events[n].title, events[n].date, recurrence, {
                     location: events[n].location,
@@ -257,9 +255,11 @@ function myFunction() {
                 });
             }
         }
+        Utilities.sleep(1000);
         if (events[n].reminder !== "") {
             gcalEvent.addPopupReminder(events[n].reminder);
         }
+        Utilities.sleep(1000);
         switch (events[n].visibility) {
             case "PUBLIC":
                 gcalEvent.setVisibility(CalendarApp.Visibility.PUBLIC);
@@ -270,8 +270,11 @@ function myFunction() {
             default:
                 gcalEvent.setVisibility(CalendarApp.Visibility.DEFAULT);
         }
-        Utilities.sleep(1000);
+        Utilities.sleep(2000);
     }
     var now = new Date();
     cal.createEvent("Imported @" + formatDate(now), now, now);
+
+    newestMessage.moveToTrash();
+    Logger.log("Newest message '" + newestMessage.getSubject() + "'@" + newestDate + " was trashed.");
 }
